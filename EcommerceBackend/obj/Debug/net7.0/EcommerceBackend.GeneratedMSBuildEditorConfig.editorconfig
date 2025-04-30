@@ -9,19 +9,9 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = EcommerceBackend
 build_property.RootNamespace = EcommerceBackend
-<<<<<<< HEAD
-build_property.ProjectDir = c:\Users\Mr. T\Ecommerce\Ecommerce\EcommerceBackend\
-build_property.EnableComHosting = 
-build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.ProjectDir = D:\Ecommerce\EcommerceBackend\
 build_property.RazorLangVersion = 7.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = c:\Users\Mr. T\Ecommerce\Ecommerce\EcommerceBackend
-=======
-build_property.ProjectDir = C:\Users\Trung Giang\Ecommerce\EcommerceBackend\
-build_property.RazorLangVersion = 7.0
-build_property.SupportLocalizedComponentNames = 
-build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\Trung Giang\Ecommerce\EcommerceBackend
->>>>>>> bdcf109d7b14c99e03963bdbd9be095001eee0c5
+build_property.MSBuildProjectDirectory = D:\Ecommerce\EcommerceBackend
 build_property._RazorSourceGeneratorDebug = 
