@@ -16,7 +16,7 @@ class _OnbroadingScreenState extends State<OnbroadingScreen> {
     'assets/images/splash_screen_2.png',
     'assets/images/splash_screen_3.png',
     'assets/images/splash_screen_4.png',
-  ];
+  ];  
 
   @override
   void dispose() {
