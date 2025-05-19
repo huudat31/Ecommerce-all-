@@ -18,7 +18,7 @@ namespace Controllers {
                     OrderId = request.OrderId,
                     ProductId = request.ProductId,
                     Quantity = request.Quantity,
-                    TotalPrice = request.TotalPrice,
+                    Price = request.Price,
                 };
                 _context.OrderDetails.Add(orderDetail);
                 await _context.SaveChangesAsync();
@@ -48,7 +48,7 @@ namespace Controllers {
                 orderDetail.OrderId = request.OrderId;
                 orderDetail.ProductId = request.ProductId;
                 orderDetail.Quantity = request.Quantity;
-                orderDetail.TotalPrice = request.TotalPrice;
+                orderDetail.Price = request.Price;
                 await _context.SaveChangesAsync();
                 return NoContent();
             } catch (Exception ex) {
@@ -73,6 +73,6 @@ namespace Controllers {
         public int OrderId { get; set; }
         public int ProductId { get; set; }
         public int Quantity { get; set; }
-        public decimal TotalPrice { get; set; }
+        public decimal Price { get; set; }
     }
-}
+}    
