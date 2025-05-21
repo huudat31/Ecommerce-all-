@@ -13,6 +13,4 @@ public class AppDbContext : DbContext{
     public DbSet<Order> Orders {get; set;}
     public DbSet<OrderDetail> OrderDetails {get; set;}
     public DbSet<Reviewer> Reviewers {get; set;}
-    public DbSet<Payment> Payments {get; set;}
-    public DbSet<CartItem> CartItems {get; set;}
 }

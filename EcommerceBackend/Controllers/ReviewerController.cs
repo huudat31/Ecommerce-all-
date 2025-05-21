@@ -1,88 +1,76 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-
-
-namespace Controllers{
+namespace Controllers {
     [ApiController]
     [Route("[controller]")]
-    public class ReviewerController: ControllerBase{
+    public class ReviewerController : ControllerBase {
         private readonly AppDbContext _context;
-        public ReviewerController(AppDbContext context){
+
+        public ReviewerController(AppDbContext context) {
             _context = context;
         }
+
         [HttpPost]
-        public async Task<ActionResult<Reviewer>> CreateReviewer([FromBody] ReviewerRequest request){
-            try{
-                var reviewer = new Reviewer{
-                    UserId = request.UserId,
-                    ProductId = request.ProductId,
-                    Rating = request.Rating,
-                    Comment = request.Comment,
-                };
-                _context.Reviewers.Add(reviewer);
-                await _context.SaveChangesAsync();
-                return CreatedAtAction(nameof(GetReviewer), new {id = reviewer.Id}, reviewer);
-            }catch(Exception ex){
-                return BadRequest(ex.Message);
-            }
+        public async Task<ActionResult<Reviewer>> CreateReviewer([FromBody] ReviewerRequest request) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var reviewer = new Reviewer {
+                
+            };
+
+            _context.Reviewers.Add(reviewer);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetReviewer), new { id = reviewer.Id }, reviewer);
         }
 
-
-        // Lay danh sach theo id sa
         [HttpGet("{id}")]
-        public async Task<ActionResult<Reviewer>> GetReviewer(int id){
-            var reviewer = await _context.Reviewers.FirstOrDefaultAsync(q=> q.Id == id);
-            if(reviewer == null)
+        public async Task<ActionResult<Reviewer>> GetReviewer(int id) {
+            var reviewer = await _context.Reviewers.FindAsync(id);
+            if (reviewer == null)
                 return NotFound();
             return reviewer;
         }
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Reviewer>>> GetAllReviewers(){
-            var reviewers = await _context.Reviewers.ToListAsync();
-            return reviewers;
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Reviewer>>> GetAllReviewers() {
+            return await _context.Reviewers.ToListAsync();
         }
+
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateReviewer(int id, [FromBody] ReviewerRequest request){
-            var reviewer = await _context.Reviewers.FirstOrDefaultAsync(q=> q.Id == id);
-            if(reviewer == null)
+        public async Task<IActionResult> UpdateReviewer(int id, [FromBody] ReviewerRequest request) {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var reviewer = await _context.Reviewers.FindAsync(id);
+            if (reviewer == null)
                 return NotFound();
-            try{
-                reviewer.UserId = request.UserId;
-                reviewer.ProductId = request.ProductId;
-                reviewer.Rating = request.Rating;
-                reviewer.Comment = request.Comment;
-                await _context.SaveChangesAsync();
-                return Ok(new{
-                    Message = "Update successful"
-                });
-            }
-            catch(Exception ex){
-                return BadRequest(ex.Message);
-            }
+
+            
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
+
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteReviewer(int id){
-            var reviewer = await _context.Reviewers.FirstOrDefaultAsync(q=>q.Id ==  id);
-            if(reviewer == null)
+        public async Task<IActionResult> DeleteReviewer(int id) {
+            var reviewer = await _context.Reviewers.FindAsync(id);
+            if (reviewer == null)
                 return NotFound();
-            try{
-                _context.Reviewers.Remove(reviewer);
-                await _context.SaveChangesAsync();
-                return Ok(new{
-                    Message = "Delete successful"
-                });
-            }catch(Exception ex){
-                return BadRequest(ex.Message);
-            }
+
+            _context.Reviewers.Remove(reviewer);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
-    public class ReviewerRequest{
-        public int UserId { get; set; }
-        public int ProductId { get; set; }
-        public int Rating { get; set; }
-        public string Comment { get; set; }
+
+    // NÊN tách class này vào thư mục DTOs riêng
+    public class ReviewerRequest {
+        
     }
 }
