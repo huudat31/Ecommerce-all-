@@ -43,4 +43,5 @@ export const deleteCategory = async (id: string) => {
     console.error('Error deleting category:', error);
     throw error;
   }
+  
 }

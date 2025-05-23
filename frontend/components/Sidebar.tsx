@@ -5,7 +5,7 @@ export default function Sidebar() {
         <div className="w-1/5 bg-white border-r border-gray-200 shadow h-screen p-4">
             <div className="flex flex-col items-start h-full">
                 <h1 className="text-xl font-semibold text-gray-800 mb-6 self-center">
-                    Quản trị viên
+                    Admin
                 </h1>
                 <ul className="space-y-2 w-full">
                     <li>
