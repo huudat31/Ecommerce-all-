@@ -1,19 +1,39 @@
-import React from "react";
-import Sidebar from "@/components/Sidebar";
-import Navbar from "@/components/Navbar";
-import Category from "./categories/page";   
+"use client";
 
-export default function AdminLayout({children}: {children: React.ReactNode}) {
+import React, { useState } from "react";
+import Category from "./categories/page";
+import Sidebar from "@/components/Sidebar";
+import { User } from "lucide-react";
+import Products from "./products/page";
+
+export default function AdminLayout() {
+    const [activeComponent, setActiveComponent] = useState("categories");
+
+
+    const renderContent = () => {
+        switch (activeComponent) {
+            case "categories":
+                return <Category />;
+            case "users":
+                return <User />;
+            case "products":
+                return <Products />;
+            case "orders":
+                return <div>Orders component sẽ được tạo</div>;
+            default:
+                return <User />;
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white text-gray-900">
-            <Navbar />
             <div className="flex">
-                <Sidebar />
+                <Sidebar
+                    activeComponent={activeComponent}
+                    setActiveComponent={setActiveComponent}
+                />
                 <div className="flex-1 p-4">
-                    <div className="mb-4">
-                        {children}
-                    </div>
-                    <Category />
+                    <div className="mb-4">{renderContent()}</div>
                 </div>
             </div>
         </div>

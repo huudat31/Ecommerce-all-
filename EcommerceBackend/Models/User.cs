@@ -19,7 +19,9 @@ namespace Models{
         public string Password {get; set;}
 
         [Required]
-        public string FullName {get; set;}
+        [StringLength(50)]
+        [Column(TypeName = "varchar(50)")]
+        public string Email { get; set; }
 
         [Required]
         [Column(TypeName = "varchar(20)")]
@@ -29,10 +31,15 @@ namespace Models{
         [Column(TypeName = "varchar(20)")]
         public string Phone {get; set;}
 
+
+        
+
+
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public DateTime CreatAt {get; set;} = DateTime.UtcNow;
 
-        public bool IsActive {get; set;} = true;
 
+        
+        
     }
 }

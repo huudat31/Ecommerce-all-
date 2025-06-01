@@ -5,7 +5,7 @@ using Models;
 namespace Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/Products")]
     public class ProductController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -13,9 +13,9 @@ namespace Controllers
         {
             _context = context;
         }
-    
 
-    //Tạo mới sản phẩm
+
+        //Tạo mới sản phẩm
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct([FromBody] ProductRequest request)
         {
@@ -26,7 +26,9 @@ namespace Controllers
                     Name = request.Name,
                     Description = request.Description,
                     Price = request.Price,
-                    CategoryId = request.CategoryId
+                    CategoryId = request.CategoryId,
+                    Instock = request.Instock,
+                    ImageUrl = request.ImageUrl
                 };
                 _context.Products.Add(product);
                 await _context.SaveChangesAsync();
@@ -65,10 +67,12 @@ namespace Controllers
             product.Description = request.Description;
             product.Price = request.Price;
             product.CategoryId = request.CategoryId;
+            product.Instock = request.Instock;
+            product.ImageUrl = request.ImageUrl;
             await _context.SaveChangesAsync();
             return Ok(new { Message = "Cập nhật thành công" });
         }
-    
+
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteProduct(int id)
@@ -87,5 +91,9 @@ namespace Controllers
         public string Description { get; set; }
         public decimal Price { get; set; }
         public int CategoryId { get; set; }
+
+        public int Instock { get; set; }
+
+        public string? ImageUrl { get; set; }
     }
 }
