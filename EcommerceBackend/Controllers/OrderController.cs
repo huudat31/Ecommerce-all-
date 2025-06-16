@@ -5,7 +5,7 @@ using Models;
 namespace Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/Order")]
     public class OrderController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -26,7 +26,6 @@ namespace Controllers
                     UserId = request.UserId,
                     TotalAmount = request.TotalAmount,
                     TotalStatus = request.TotalStatus,
-                    
                 };
 
                 _context.Orders.Add(order);
@@ -67,6 +66,7 @@ namespace Controllers
 
             try
             {
+                order.UserId = request.UserId;
                 order.TotalAmount = request.TotalAmount;
                 order.TotalStatus = request.TotalStatus;
 

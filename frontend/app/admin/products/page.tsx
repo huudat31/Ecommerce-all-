@@ -204,16 +204,35 @@ export default function Products() {
         return category ? category.name : categoryId; // Fallback to categoryId if not found
     };
 
+    // Hàm helper để kiểm tra trạng thái sản phẩm
+    const getProductStatus = (product: Product) => {
+        // Ưu tiên field inStock nếu có, không thì dựa vào stock
+        const isAvailable = product.inStock !== undefined ? product.inStock : product.stock > 0;
+
+        if (!isAvailable || product.stock === 0) {
+            return { status: 'outOfStock', label: 'Hết hàng', color: 'red' };
+        } else if (product.stock <= 10) {
+            return { status: 'lowStock', label: 'Sắp hết', color: 'yellow' };
+        } else {
+            return { status: 'inStock', label: 'Còn hàng', color: 'green' };
+        }
+    };
+
     const handleAddNew = () => {
         resetForm();
         setShowForm(true);
     };
 
-    // Calculate statistics
+    // Calculate statistics - Sửa lại logic tính toán
     const totalProducts = products.length;
-    const inStock = products.filter(p => p.stock > 10 || p.inStock).length; // Sử dụng inStock field
-    const outOfStock = products.filter(p => p.stock === 0 || !p.inStock).length;
-    const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10 && p.inStock).length;
+    type ProductStatusKey = 'inStock' | 'outOfStock' | 'lowStock';
+    const productStats = products.reduce((acc, product) => {
+        const status = getProductStatus(product);
+        acc[status.status as ProductStatusKey]++;
+        return acc;
+    }, { inStock: 0, outOfStock: 0, lowStock: 0 });
+
+    const { inStock, outOfStock, lowStock } = productStats;
 
     if (loading) {
         return (
@@ -430,9 +449,6 @@ export default function Products() {
                                 Tồn kho
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Có sẵn
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Trạng thái
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -441,89 +457,76 @@ export default function Products() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {products.map((product) => (
-                            <tr key={product.id} className="hover:bg-gray-50 transition-colors">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="w-16 h-16 flex-shrink-0">
-                                        {product.imageUrl ? (
-                                            <img
-                                                src={product.imageUrl}
-                                                alt={product.name}
-                                                className="w-16 h-16 object-cover rounded-lg border border-gray-200"
-                                                onError={(e) => {
-                                                    e.currentTarget.style.display = 'none';
-                                                    const next = e.currentTarget.nextElementSibling as HTMLElement | null;
-                                                    if (next) next.style.display = 'flex';
-                                                }}
-                                            />
-                                        ) : null}
-                                        <div
-                                            className={`w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center ${product.imageUrl ? 'hidden' : 'flex'}`}
-                                        >
-                                            <Image className="h-6 w-6 text-gray-400" />
+                        {products.map((product) => {
+                            const status = getProductStatus(product);
+                            return (
+                                <tr key={product.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div className="w-16 h-16 flex-shrink-0">
+                                            {product.imageUrl ? (
+                                                <img
+                                                    src={product.imageUrl}
+                                                    alt={product.name}
+                                                    className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = 'none';
+                                                        const next = e.currentTarget.nextElementSibling as HTMLElement | null;
+                                                        if (next) next.style.display = 'flex';
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <div
+                                                className={`w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center ${product.imageUrl ? 'hidden' : 'flex'}`}
+                                            >
+                                                <Image className="h-6 w-6 text-gray-400" />
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            {product.name}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                                {product.name}
+                                            </div>
+                                            <div className="text-sm text-gray-500 max-w-xs truncate">
+                                                {product.description}
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-gray-500 max-w-xs truncate">
-                                            {product.description}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {getCategoryName(product.categoryId || product.category)}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {product.price.toLocaleString('vi-VN')} VNĐ
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        {product.stock}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${status.color}-100 text-${status.color}-800`}>
+                                            {status.label}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                        <div className="flex space-x-2">
+                                            <button
+                                                onClick={() => handleEdit(product)}
+                                                className="text-blue-600 hover:text-blue-900 transition-colors"
+                                                title="Sửa sản phẩm"
+                                            >
+                                                <Edit className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteProduct(product.id)}
+                                                className="text-red-600 hover:text-red-900 transition-colors"
+                                                title="Xóa sản phẩm"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
                                         </div>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {getCategoryName(product.categoryId || product.category)}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {product.price.toLocaleString('vi-VN')} VNĐ
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {product.stock}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.inStock !== undefined
-                                        ? (product.inStock ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
-                                        : (product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
-                                        }`}>
-                                        {product.inStock !== undefined
-                                            ? (product.inStock ? 'Có sẵn' : 'Không có')
-                                            : (product.stock > 0 ? 'Có sẵn' : 'Không có')
-                                        }
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.stock === 0
-                                        ? 'bg-red-100 text-red-800'
-                                        : product.stock <= 10
-                                            ? 'bg-yellow-100 text-yellow-800'
-                                            : 'bg-green-100 text-green-800'
-                                        }`}>
-                                        {product.stock === 0 ? 'Hết hàng' : product.stock <= 10 ? 'Sắp hết' : 'Còn hàng'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div className="flex space-x-2">
-                                        <button
-                                            onClick={() => handleEdit(product)}
-                                            className="text-blue-600 hover:text-blue-900 transition-colors"
-                                            title="Sửa sản phẩm"
-                                        >
-                                            <Edit className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteProduct(product.id)}
-                                            className="text-red-600 hover:text-red-900 transition-colors"
-                                            title="Xóa sản phẩm"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>

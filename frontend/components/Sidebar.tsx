@@ -26,6 +26,7 @@ export default function Sidebar({ activeComponent, setActiveComponent }: { activ
             icon: Users,
             onClick: () => setActiveComponent("users"),
         },
+
     ];
 
     return (

@@ -121,3 +121,54 @@ export const deleteProduct = async (id: string) => {
     throw error;
   }
 }
+
+
+
+export const fetchOrders = async () => {
+  try {
+    const response = await api.get('/Order');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    throw error;
+  }
+}
+export const createOrder = async (data: { userId: string, totalAmount: number, totalStatus: string }) => {
+  try {
+    const response = await api.post('/Order', data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating order:', error);
+    throw error;
+  }
+}
+export const updateOrder = async (id: string, data: { userId: string, totalAmount: number, totalStatus: string }) => {
+  try {
+    const response = await api.put(`/Order/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating order:', error);
+    throw error;
+  }
+}
+export const deleteOrder = async (id: string) => {
+  try {
+    const response = await api.delete(`/Order/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    throw error;
+  }
+}
+
+export const login = async (username: string, password: string) => {
+  try {
+    const response = await api.post(`/auth/login`, { username, password })
+    return response;
+  }
+  catch (error) {
+    console.error('Error deleting order:', error);
+    throw error;
+  }
+}
+// export default API;

@@ -3,8 +3,12 @@
 import React, { useState } from "react";
 import Category from "./categories/page";
 import Sidebar from "@/components/Sidebar";
-import { User } from "lucide-react";
+
 import Products from "./products/page";
+
+import Orders from "./orders/page";
+import LoginPage from "./logins/page";
+import User from "./users/page";
 
 export default function AdminLayout() {
     const [activeComponent, setActiveComponent] = useState("categories");
@@ -19,7 +23,7 @@ export default function AdminLayout() {
             case "products":
                 return <Products />;
             case "orders":
-                return <div>Orders component sẽ được tạo</div>;
+                return <Orders />
             default:
                 return <User />;
         }

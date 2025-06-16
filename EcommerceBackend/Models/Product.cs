@@ -16,7 +16,6 @@ namespace Models
         [Column(TypeName = "varchar(100)")]
         public string Name { get; set; }
 
-
         [StringLength(255)]
         [Column(TypeName = "nvarchar(255)")]
         public string Description { get; set; }
@@ -29,6 +28,7 @@ namespace Models
         [Column(TypeName = "int")]
         public int Instock { get; set; }
 
+        [StringLength(255)]
         [Column(TypeName = "nvarchar(255)")]
         public string? ImageUrl { get; set; }
 

@@ -1,11 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {  Edit, Trash2, Plus, X, Save, UserCheck, UserX, Phone, Mail, Lock, Badge } from "lucide-react";
+import { Edit, Trash2, Plus, X, Save, UserCheck, UserX, Phone, Mail, Lock, Badge } from "lucide-react";
 import { fetchUser, createUser, updateUser, deleteUser } from "@/app/services/api";
 
 
 
-export default function User(){
+export default function User() {
     const [users, setUsers] = useState<any[]>([]);
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
@@ -27,38 +27,38 @@ export default function User(){
             setLoading(false);
         })
     }, []);
-    
+
     const resetForm = () => {
-        setName(''); 
-        setEmail(''); 
-        setPassword(''); 
-        setRole('user'); 
-        setPhone(''); 
-        setIsActive(true); 
-        setIsEditing(false); 
-        setEditUserId(null); 
+        setName('');
+        setEmail('');
+        setPassword('');
+        setRole('user');
+        setPhone('');
+        setIsActive(true);
+        setIsEditing(false);
+        setEditUserId(null);
         setShowForm(false);
     };
     // xử lí khi nhấn nút thêm người dùng mới
     const handleCreateUser = async () => {
-        try{
-            if(!name.trim() ){
-            alert("Nhap ten nguoi dung");
-            return ;
+        try {
+            if (!name.trim()) {
+                alert("Nhap ten nguoi dung");
+                return;
             }
-        if(!email.trim()){
-            alert("Nhap email nguoi dung");
-        return ;
+            if (!email.trim()) {
+                alert("Nhap email nguoi dung");
+                return;
             }
-        if(!password.trim()){
-            alert("Nhap mat khau nguoi dung");
-        return ;
+            if (!password.trim()) {
+                alert("Nhap mat khau nguoi dung");
+                return;
             }
-        if(!phone.trim()){
-            alert("Nhap so dien thoai nguoi dung");
-        return ;
+            if (!phone.trim()) {
+                alert("Nhap so dien thoai nguoi dung");
+                return;
             }
-        const newUser = await createUser({name, email, password, role, phone, isActive});
+            const newUser = await createUser({ name, email, password, role, phone, isActive });
             resetForm();
             // Refresh users list after creating
             const updatedUsers = await fetchUser();
@@ -81,25 +81,25 @@ export default function User(){
     // xử lí khi nhấn nút sửa người dùng
     const handleUpdateUser = async () => {
         if (!editUserId) return;
-        
+
         try {
-            if(!name.trim() ){
+            if (!name.trim()) {
                 alert("Nhap ten nguoi dung");
-                return ;
+                return;
             }
-            if(!email.trim()){
+            if (!email.trim()) {
                 alert("Nhap email nguoi dung");
-                return ;
+                return;
             }
-            if(!password.trim()){
+            if (!password.trim()) {
                 alert("Nhap mat khau nguoi dung");
-                return ;
+                return;
             }
-            if(!phone.trim()){
+            if (!phone.trim()) {
                 alert("Nhap so dien thoai nguoi dung");
-                return ;
+                return;
             }
-            const updatedUser = await updateUser(editUserId.toString(), {name, email, password, role, phone, isActive});
+            const updatedUser = await updateUser(editUserId.toString(), { name, email, password, role, phone, isActive });
             resetForm();
             // Refresh users list after updating
             const updatedUsers = await fetchUser();
@@ -134,8 +134,8 @@ export default function User(){
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
         );
     }
     return (
@@ -291,7 +291,7 @@ export default function User(){
                                     Danh sách người dùng ({users.length})
                                 </h2>
                             </div>
-                            
+
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead className="bg-gray-50">
@@ -336,20 +336,18 @@ export default function User(){
                                                     <div className="text-sm text-gray-500">{user.phone}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                        user.role === 'admin' 
-                                                            ? 'bg-purple-100 text-purple-800' 
-                                                            : 'bg-gray-100 text-gray-800'
-                                                    }`}>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.role === 'admin'
+                                                        ? 'bg-purple-100 text-purple-800'
+                                                        : 'bg-gray-100 text-gray-800'
+                                                        }`}>
                                                         {user.role === 'admin' ? 'Quản trị viên' : 'Người dùng'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                        user.isActive 
-                                                            ? 'bg-green-100 text-green-800' 
-                                                            : 'bg-red-100 text-red-800'
-                                                    }`}>
+                                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${user.isActive
+                                                        ? 'bg-green-100 text-green-800'
+                                                        : 'bg-red-100 text-red-800'
+                                                        }`}>
                                                         {user.isActive ? (
                                                             <>
                                                                 <UserCheck className="h-3 w-3 mr-1" />
