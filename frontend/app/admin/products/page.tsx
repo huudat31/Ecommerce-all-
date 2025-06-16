@@ -7,11 +7,11 @@ interface Product {
     id: number;
     name: string;
     description: string;
-    price: number;
-    stock: number;
-    inStock: boolean; // Thêm field inStock
+    price: number | null | undefined;
+    stock: number | null | undefined;
+    inStock: boolean;
     category: string;
-    categoryId: string; // Thêm categoryId
+    categoryId: string;
     imageUrl: string;
 }
 
@@ -25,16 +25,15 @@ export default function Products() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [name, setName] = useState<string>('');
     const [description, setDescription] = useState<string>('');
-    const [price, setPrice] = useState<number | string>(''); // Allow string for empty input
-    const [stock, setStock] = useState<number | string>(''); // Allow string for empty input
+    const [price, setPrice] = useState<string>('');
+    const [stock, setStock] = useState<string>('');
     const [categoryId, setCategoryId] = useState<string>('');
-    const [imageUrl, setImageUrl] = useState<string>(''); // Thêm imageUrl state
+    const [imageUrl, setImageUrl] = useState<string>('');
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editProductId, setEditProductId] = useState<number | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState<boolean>(false);
-    const [image, setImage] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
     useEffect(() => {
@@ -47,7 +46,7 @@ export default function Products() {
             setError(null);
             const [productsData, categoriesData] = await Promise.all([
                 fetchProducts(),
-                fetchCategories() // Giả sử có API fetchCategories
+                fetchCategories()
             ]);
             setProducts(productsData);
             setCategories(categoriesData);
@@ -76,10 +75,9 @@ export default function Products() {
         setPrice('');
         setStock('');
         setCategoryId('');
-        setImageUrl(''); // Reset imageUrl
+        setImageUrl('');
         setIsEditing(false);
         setEditProductId(null);
-        setImage(null);
         setShowForm(false);
         setError(null);
     };
@@ -89,23 +87,57 @@ export default function Products() {
             setError("Tên sản phẩm không được để trống");
             return false;
         }
-        if (!categoryId.trim()) {
+
+        if (!categoryId || !categoryId.trim()) {
             setError("Danh mục không được để trống");
             return false;
         }
-        if (!price || Number(price) <= 0) {
-            setError("Giá phải lớn hơn 0");
+
+        // Improved price validation
+        if (!price.trim()) {
+            setError("Giá không được để trống");
             return false;
         }
-        if (stock === '' || Number(stock) < 0) {
-            setError("Số lượng tồn kho phải lớn hơn hoặc bằng 0");
+        const priceNum = parseFloat(price);
+        if (isNaN(priceNum) || priceNum <= 0) {
+            setError("Giá phải là số và lớn hơn 0");
             return false;
         }
+
+        // Improved stock validation
+        if (!stock.trim()) {
+            setError("Số lượng tồn kho không được để trống");
+            return false;
+        }
+        const stockNum = parseInt(stock, 10);
+        if (isNaN(stockNum) || stockNum < 0) {
+            setError("Số lượng tồn kho phải là số nguyên và lớn hơn hoặc bằng 0");
+            return false;
+        }
+
         if (!description.trim()) {
             setError("Mô tả không được để trống");
             return false;
         }
+
         return true;
+    };
+
+    const prepareProductData = () => {
+        const productData = {
+            name: name.trim(),
+            description: description.trim(),
+            price: Number(parseFloat(price).toFixed(2)), // Ensure proper number format
+            categoryId: categoryId.trim(),
+            stock: Number(parseInt(stock, 10)), // Ensure integer
+            imageUrl: imageUrl.trim() || ''
+        };
+
+        // Log for debugging
+        console.log('Preparing product data:', productData);
+        console.log('Stock value type:', typeof productData.stock, 'Value:', productData.stock);
+
+        return productData;
     };
 
     const handleCreateProduct = async () => {
@@ -115,18 +147,14 @@ export default function Products() {
             setIsSubmitting(true);
             setError(null);
 
-            const productData = {
-                name: name.trim(),
-                description: description.trim(),
-                price: Number(price),
-                categoryId: categoryId.trim(),
-                stock: Number(stock),
-                imageUrl: imageUrl.trim() || '' // Sử dụng imageUrl từ state
-            };
+            const productData = prepareProductData();
+            console.log('Creating product with data:', productData);
 
-            await createProduct(productData);
+            const result = await createProduct(productData);
+            console.log('Create product result:', result);
+
             resetForm();
-            await loadProducts(); // Reload products after creation
+            await loadProducts();
         } catch (error) {
             console.error("Error creating product:", error);
             setError(error instanceof Error ? error.message : "Lỗi khi tạo sản phẩm");
@@ -142,18 +170,14 @@ export default function Products() {
             setIsSubmitting(true);
             setError(null);
 
-            const productData = {
-                name: name.trim(),
-                description: description.trim(),
-                price: Number(price),
-                categoryId: categoryId.trim(),
-                stock: Number(stock),
-                imageUrl: imageUrl.trim() || '' // Sử dụng imageUrl từ state
-            };
+            const productData = prepareProductData();
+            console.log('Updating product ID:', editProductId, 'with data:', productData);
 
-            await updateProduct(editProductId.toString(), productData);
+            const result = await updateProduct(editProductId.toString(), productData);
+            console.log('Update product result:', result);
+
             resetForm();
-            await loadProducts(); // Reload products after update
+            await loadProducts();
         } catch (error) {
             console.error("Error updating product:", error);
             setError(error instanceof Error ? error.message : "Lỗi khi cập nhật sản phẩm");
@@ -168,7 +192,7 @@ export default function Products() {
         try {
             setError(null);
             await deleteProduct(id.toString());
-            await loadProducts(); // Reload products after deletion
+            await loadProducts();
         } catch (error) {
             console.error("Error deleting product:", error);
             setError(error instanceof Error ? error.message : "Lỗi khi xóa sản phẩm");
@@ -186,36 +210,53 @@ export default function Products() {
     };
 
     const handleEdit = (product: Product) => {
+        console.log('Editing product:', product);
+
         setName(product.name);
         setDescription(product.description);
-        setPrice(product.price);
-        setStock(product.stock);
-        setCategoryId(product.categoryId || product.category); // Ưu tiên categoryId
-        setImageUrl(product.imageUrl || ''); // Set imageUrl
+        // Ensure we're setting string values for form inputs
+        setPrice(product.price !== null && product.price !== undefined ? product.price.toString() : '');
+        setStock(product.stock !== null && product.stock !== undefined ? product.stock.toString() : '0');
+        setCategoryId(product.categoryId || product.category || '');
+        setImageUrl(product.imageUrl || '');
         setIsEditing(true);
         setEditProductId(product.id);
         setShowForm(true);
         setError(null);
+
+        console.log('Form values set - Price:', product.price, 'Stock:', product.stock);
     };
 
-    // Hàm helper để lấy tên category từ categoryId
+    // Helper function to get category name from categoryId
     const getCategoryName = (categoryId: string) => {
         const category = categories.find(cat => cat.id === categoryId);
-        return category ? category.name : categoryId; // Fallback to categoryId if not found
+        return category ? category.name : categoryId;
     };
 
-    // Hàm helper để kiểm tra trạng thái sản phẩm
+    // Helper function to check product status
     const getProductStatus = (product: Product) => {
-        // Ưu tiên field inStock nếu có, không thì dựa vào stock
-        const isAvailable = product.inStock !== undefined ? product.inStock : product.stock > 0;
+        const stockValue = product.stock ?? 0;
+        const isAvailable = product.inStock !== undefined ? product.inStock : (stockValue > 0);
 
-        if (!isAvailable || product.stock === 0) {
+        if (!isAvailable || stockValue === 0) {
             return { status: 'outOfStock', label: 'Hết hàng', color: 'red' };
-        } else if (product.stock <= 10) {
+        } else if (stockValue <= 10) {
             return { status: 'lowStock', label: 'Sắp hết', color: 'yellow' };
         } else {
             return { status: 'inStock', label: 'Còn hàng', color: 'green' };
         }
+    };
+
+    // Helper function to display stock information
+    const getStockDisplay = (product: Product) => {
+        const stockValue = product.stock ?? 0;
+        const status = getProductStatus(product);
+
+        return {
+            value: stockValue,
+            display: `${stockValue} sản phẩm`,
+            status: status
+        };
     };
 
     const handleAddNew = () => {
@@ -223,8 +264,10 @@ export default function Products() {
         setShowForm(true);
     };
 
-    // Calculate statistics - Sửa lại logic tính toán
+    // Calculate statistics
     const totalProducts = products.length;
+    const totalStock = products.reduce((total, product) => total + (product.stock || 0), 0);
+
     type ProductStatusKey = 'inStock' | 'outOfStock' | 'lowStock';
     const productStats = products.reduce((acc, product) => {
         const status = getProductStatus(product);
@@ -263,7 +306,7 @@ export default function Products() {
             )}
 
             {/* Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="flex items-center justify-between">
                         <div>
@@ -271,6 +314,17 @@ export default function Products() {
                             <p className="text-2xl font-bold text-blue-800">{totalProducts}</p>
                         </div>
                         <Package className="h-8 w-8 text-blue-500" />
+                    </div>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-purple-600 text-sm font-medium">Tổng tồn kho</p>
+                            <p className="text-2xl font-bold text-purple-800">{totalStock.toLocaleString('vi-VN')}</p>
+                        </div>
+                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">Σ</span>
+                        </div>
                     </div>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
@@ -356,7 +410,10 @@ export default function Products() {
                             <input
                                 type="number"
                                 value={price}
-                                onChange={(e) => setPrice(e.target.value)}
+                                onChange={(e) => {
+                                    console.log('Price input changed:', e.target.value);
+                                    setPrice(e.target.value);
+                                }}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="0"
                                 min="1"
@@ -371,7 +428,10 @@ export default function Products() {
                             <input
                                 type="number"
                                 value={stock}
-                                onChange={(e) => setStock(e.target.value)}
+                                onChange={(e) => {
+                                    console.log('Stock input changed:', e.target.value);
+                                    setStock(e.target.value);
+                                }}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="0"
                                 min="0"
@@ -458,7 +518,7 @@ export default function Products() {
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {products.map((product) => {
-                            const status = getProductStatus(product);
+                            const stockInfo = getStockDisplay(product);
                             return (
                                 <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -496,14 +556,21 @@ export default function Products() {
                                         {getCategoryName(product.categoryId || product.category)}
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {product.price.toLocaleString('vi-VN')} VNĐ
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {product.stock}
+                                        {(product.price != null ? product.price.toLocaleString('vi-VN') : 'N/A')} VNĐ
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${status.color}-100 text-${status.color}-800`}>
-                                            {status.label}
+                                        <div className="text-sm text-gray-900">
+                                            <span className="font-semibold text-lg">
+                                                {stockInfo.value.toLocaleString('vi-VN')}
+                                            </span>
+                                            <div className="text-xs text-gray-500">
+                                                sản phẩm
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${stockInfo.status.color}-100 text-${stockInfo.status.color}-800`}>
+                                            {stockInfo.status.label}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

@@ -42,18 +42,38 @@ namespace Controllers
 
         //Lấy sản phẩm
         [HttpGet("{id}")]
-        public async Task<ActionResult<Product>> GetProduct(int id)
+        public async Task<ActionResult<ProductResponse>> GetProduct(int id)
         {
             var product = await _context.Products.FirstOrDefaultAsync(q => q.Id == id);
             if (product == null)
                 return NotFound();
-            return product;
+            return new ProductResponse
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                Stock = product.Instock,
+                Instock = product.Instock > 0 ? true : false,
+                ImageUrl = product.ImageUrl,
+            };
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
+        public async Task<ActionResult<IEnumerable<ProductResponse>>> GetAllProducts()
         {
-            var products = await _context.Products.ToListAsync();
+            var products = await _context.Products.Select(product => new ProductResponse
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                Stock = product.Instock,
+                Instock = product.Instock > 0 ? true : false,
+                ImageUrl = product.ImageUrl
+            }).ToListAsync();
             return products;
         }
 
@@ -94,6 +114,18 @@ namespace Controllers
 
         public int Instock { get; set; }
 
+        public string? ImageUrl { get; set; }
+    }
+
+    public class ProductResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public decimal Price { get; set; }
+        public int CategoryId { get; set; }
+        public int Stock { get; set; }
+        public bool Instock { get; set; }
         public string? ImageUrl { get; set; }
     }
 }
